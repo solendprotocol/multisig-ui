@@ -48,7 +48,6 @@ import {
   SYSVAR_RENT_PUBKEY,
   SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
-import * as anchor from "@project-serum/anchor";
 import { useWallet } from "./WalletProvider";
 import { ViewTransactionOnExplorerButton } from "./Notification";
 import * as idl from "../utils/idl";
@@ -1373,5 +1372,3 @@ async function idlAddress(programId: PublicKey): Promise<PublicKey> {
 function seed(): string {
   return "anchor:idl";
 }
-
-// The 
