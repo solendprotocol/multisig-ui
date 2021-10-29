@@ -70,7 +70,7 @@ export const networks: Networks = {
     url: "https://api.devnet.solana.com",
     explorerClusterSuffix: "devnet",
     multisigProgramId: new PublicKey(
-      "2NzsfG5TeEZ1MJ6aKMsV4co6MqwrLjsAbLa5XeCyFdFN"
+      "5FRWTCJqEz1LmXT3p5kyJPm5erfYPoYaJcDpt6BWPrmy"
     ),
   },
   // Fill in with your local cluster addresses.
