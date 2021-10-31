@@ -55,7 +55,7 @@ export const networks: Networks = {
   mainnet: {
     // Cluster.
     label: "Mainnet Beta",
-    url: "https://solana-api.projectserum.com",
+    url: "https://lokidfxnwlabdq.main.genesysgo.net:8899",
     explorerClusterSuffix: "",
     multisigProgramId: new PublicKey(
       "BLg8mSPvEjzSkbGdE9mRJfTSm7EauYgzFsWhERKn1gRm"
