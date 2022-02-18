@@ -101,32 +101,6 @@ export default function Header() {
   );
 }
 
-function SerumLogoButton() {
-  const history = useHistory();
-  return (
-    <div style={{ display: "flex" }} onClick={() => history.push("/")}>
-      <Button color="inherit">
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <img
-            style={{
-              display: "block",
-              height: "35px",
-            }}
-            alt="Logo"
-            src="http://dex.projectserum.com/static/media/logo.49174c73.svg"
-          />
-        </div>
-      </Button>
-    </div>
-  );
-}
-
 type BarButtonProps = {
   label: string;
   hrefClient?: string;
