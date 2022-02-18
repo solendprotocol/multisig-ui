@@ -12,6 +12,7 @@ import WalletProvider from "./components/WalletProvider";
 import Layout from "./components/Layout";
 import Multisig from "./components/Multisig";
 import { networks } from "./store/reducer";
+import { AccountProvider } from "./context/AccountContext";
 
 function App() {
   const theme = createMuiTheme({
@@ -31,16 +32,18 @@ function App() {
         <CssBaseline />
         <SnackbarProvider maxSnack={5} autoHideDuration={8000}>
           <WalletProvider>
-            <HashRouter basename={"/"}>
-              <Layout>
-                <Route exact path="/" component={MultisigPage} />
-                <Route
-                  exact
-                  path="/:address"
-                  component={MultisigInstancePage}
-                />
-              </Layout>
-            </HashRouter>
+            <AccountProvider>
+              <HashRouter basename={"/"}>
+                <Layout>
+                  <Route exact path="/" component={MultisigPage} />
+                  <Route
+                    exact
+                    path="/:address"
+                    component={MultisigInstancePage}
+                  />
+                </Layout>
+              </HashRouter>
+            </AccountProvider>
           </WalletProvider>
         </SnackbarProvider>
       </MuiThemeProvider>
