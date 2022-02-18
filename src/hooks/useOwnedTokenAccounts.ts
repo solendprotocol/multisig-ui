@@ -16,7 +16,7 @@ export function useMultiSigOwnedTokenAccounts(
     const connection = provider.connection;
 
     const onLoad = async () => {
-      const [signer, nounce] = await PublicKey.findProgramAddress(
+      const [signer] = await PublicKey.findProgramAddress(
         [multiSig.toBuffer()],
         programId
       );
