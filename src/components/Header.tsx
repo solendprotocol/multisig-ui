@@ -45,14 +45,7 @@ export default function Header() {
           }}
         >
           <div style={{ display: "flex", flex: 1 }}>
-            <SerumLogoButton />
             <BarButton label="Multisig" hrefClient="/" />
-            <BarButton label="Trade" href="https://dex.projectserum.com" />
-            <BarButton label="Stake" href="https://stake.projectserum.com" />
-            <BarButton
-              label="Lockup"
-              href="https://stake.projectserum.com/#/lockup"
-            />
             <div
               style={{
                 marginLeft: "16px",
