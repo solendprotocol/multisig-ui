@@ -55,7 +55,7 @@ export const networks: Networks = {
   mainnet: {
     // Cluster.
     label: "Mainnet Beta",
-    url: "https://solend.genesysgo.net",
+    url: "https://solana--mainnet.datahub.figment.io/apikey/0e1a11d5b5daf922a4016206301cd913",
     explorerClusterSuffix: "",
     multisigProgramId: new PublicKey(
       "BLg8mSPvEjzSkbGdE9mRJfTSm7EauYgzFsWhERKn1gRm"
