@@ -60,6 +60,7 @@ import { useWallet } from "./WalletProvider";
 import { ViewTransactionOnExplorerButton } from "./Notification";
 import * as idl from "../utils/idl";
 import { networks } from "../store/reducer";
+import { ENV, TokenInfo, TokenListProvider } from "@solana/spl-token-registry";
 
 export default function Multisig({ multisig }: { multisig?: PublicKey }) {
   return (
@@ -1415,11 +1416,25 @@ function TransferTokenListItemDetails({
   const [source, setSource] = useState<null | string>(null);
   const [destination, setDestination] = useState<null | string>(null);
   const [amount, setAmount] = useState<null | u64>(null);
+  const [tokenMap, setTokenMap] = useState<Map<string, TokenInfo>>(new Map());
 
   const { multisigClient } = useWallet();
   const { enqueueSnackbar } = useSnackbar();
 
   const tokenAccounts = useMultiSigOwnedTokenAccounts(multisigClient.provider, multisig, multisigClient.programId)
+
+  useEffect(() => {
+    new TokenListProvider().resolve().then((tokens) => {
+      const tokenList = tokens
+        .filterByChainId(ENV.MainnetBeta)
+        .getList();
+
+      setTokenMap(tokenList.reduce((map, item) => {
+        map.set(item.address, item);
+        return map;
+        },new Map()));
+    });
+  }, [setTokenMap]);
 
   const createTransactionAccount = async () => {
     enqueueSnackbar("Creating transaction", {
@@ -1523,13 +1538,14 @@ function TransferTokenListItemDetails({
         >
           {tokenAccounts.map(
             tokenAccount => {
+              const tokenInfo = tokenMap.get(tokenAccount.mint.toString());
               return (
                 <MenuItem value={tokenAccount.address.toString()} onClick={
                   () => {
                     setSource(tokenAccount.address.toString());
                   }
                 }>
-                  {tokenAccount.address.toString()}
+                  {`${tokenAccount.address.toString()} [${tokenInfo && tokenInfo.symbol}:${tokenAccount.amount.toString()}]`}
                 </MenuItem>
               )
             }
@@ -1538,7 +1554,7 @@ function TransferTokenListItemDetails({
         <TextField
           style={{ marginTop: "16px" }}
           fullWidth
-          label="Amount"
+          label="Base Amount"
           value={amount}
           onChange={(e) => setAmount(new u64(e.target.value as string))}
         />
