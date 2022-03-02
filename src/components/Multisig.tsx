@@ -1461,8 +1461,6 @@ function TransferTokenListItemDetails({
       return;
     }
 
-    const tokenMint = await getMintInfo(
-      multisigClient.provider, sourceTokenAccount.mint);
 
     if (!amount) {
       enqueueSnackbar("No amount provided", {
@@ -1470,16 +1468,13 @@ function TransferTokenListItemDetails({
       });
       return
     }
-    const TEN = new u64(10);
-    const multiplier = TEN.pow(new BN(tokenMint.decimals));
-    const amountInLamports = amount.mul(multiplier);
     const transferIx = Token.createTransferInstruction(
       TOKEN_PROGRAM_ID,
       sourceAddr,
       destinationAddr,
       multisigSigner,
       [],
-      new u64(amountInLamports.toString())
+      new u64(amount.toString())
     );
     const transaction = new Account();
     const tx = await multisigClient.rpc.createTransaction(
