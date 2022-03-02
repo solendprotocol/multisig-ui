@@ -45,7 +45,7 @@ import * as serumCommon from '@project-serum/common';
 import { Token, TOKEN_PROGRAM_ID, u64, AccountInfo as TokenAccount, AccountLayout } from "@solana/spl-token";
 import { SendRounded } from "@material-ui/icons";
 import { Connection } from "@solana/web3.js";
-import { getMintInfo, getTokenAccount, parseTokenAccount } from "@project-serum/common";
+import { getTokenAccount, parseTokenAccount } from "@project-serum/common";
 import { useMultiSigOwnedTokenAccounts } from "../hooks/useOwnedTokenAccounts";
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { ACCOUNT_LAYOUT } from "@project-serum/common/dist/lib/token";
