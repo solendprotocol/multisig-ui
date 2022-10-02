@@ -125,6 +125,17 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
   }, [multisig, multisigClient.account]);
   useEffect(() => {
     multisigClient.account.transaction.all(multisig.toBuffer()).then((txs) => {
+      txs.sort((a,b)=>{
+        // old owner sets too the bottom since not even executable
+        if (a.account.ownerSetSeqno !== b.account.ownerSetSeqno){
+          return  b.account.ownerSetSeqno - a.account.ownerSetSeqno;
+        }
+        // unexecuted to the top since more relevant
+        if (a.account.didExecute !== b.account.didExecute) {
+          return a.account.didExecute - b.account.didExecute;
+        }
+        return 0;
+      });
       setTransactions(txs);
     });
   }, [multisigClient.account.transaction, multisig, forceRefresh]);
