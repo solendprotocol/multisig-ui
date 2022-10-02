@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# MULTISIG WEB APP
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Amazing multisig web app built with love
 
 ## Available Scripts
 
