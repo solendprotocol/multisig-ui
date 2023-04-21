@@ -55,6 +55,7 @@ import {
   PublicKey,
   SYSVAR_RENT_PUBKEY,
   SYSVAR_CLOCK_PUBKEY,
+  Transaction,
 } from "@solana/web3.js";
 import { useWallet } from "./WalletProvider";
 import { ViewTransactionOnExplorerButton } from "./Notification";
@@ -257,7 +258,7 @@ export function NewMultisigDialog({
   onClose: () => void;
 }) {
   const history = useHistory();
-  const { multisigClient } = useWallet();
+  const { multisigClient, wallet } = useWallet();
   const { enqueueSnackbar } = useSnackbar();
   const [threshold, setThreshold] = useState(2);
   // @ts-ignore
@@ -288,7 +289,7 @@ export function NewMultisigDialog({
       multisigClient.programId
     );
     const owners = participants.map((p) => new PublicKey(p));
-    const tx = await multisigClient.rpc.createMultisig(
+    const ix = await multisigClient.instruction.createMultisig(
       owners,
       new BN(threshold),
       nonce,
@@ -307,9 +308,22 @@ export function NewMultisigDialog({
         ],
       }
     );
+    const {
+      context: { slot: minContextSlot },
+      value: { blockhash, lastValidBlockHeight },
+    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
+    const t = new Transaction().add(ix);
+    t.recentBlockhash = blockhash;
+    t.feePayer = wallet.publicKey!;
+    const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
+    await multisigClient.provider.connection.confirmTransaction({
+      blockhash,
+      lastValidBlockHeight,
+      signature,
+    });
     enqueueSnackbar(`Multisig created: ${multisig.publicKey.toString()}`, {
       variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={tx} />,
+      action: <ViewTransactionOnExplorerButton signature={signature} />,
     });
     _onClose();
     history.push(`/${multisig.publicKey.toString()}`);
@@ -395,7 +409,7 @@ function TxListItem({
   tx: any;
 }) {
   const { enqueueSnackbar } = useSnackbar();
-  const { multisigClient } = useWallet();
+  const { multisigClient, wallet } = useWallet();
   const [open, setOpen] = useState(false);
   const [txAccount, setTxAccount] = useState(tx.account);
   useEffect(() => {
@@ -456,12 +470,26 @@ function TxListItem({
     enqueueSnackbar("Approving transaction", {
       variant: "info",
     });
-    await multisigClient.rpc.approve({
+    const ix = multisigClient.instruction.approve({
       accounts: {
         multisig,
         transaction: tx.publicKey,
         owner: multisigClient.provider.wallet.publicKey,
       },
+    });
+    const t = new Transaction();
+    t.add(ix);
+    const {
+      context: { slot: minContextSlot },
+      value: { blockhash, lastValidBlockHeight },
+    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
+    t.feePayer = wallet.publicKey!;
+    t.recentBlockhash = blockhash;
+    const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
+    await multisigClient.provider.connection.confirmTransaction({
+      blockhash,
+      lastValidBlockHeight,
+      signature,
     });
     enqueueSnackbar("Transaction approved", {
       variant: "success",
@@ -475,7 +503,7 @@ function TxListItem({
       [multisig.toBuffer()],
       multisigClient.programId
     );
-    await multisigClient.rpc.executeTransaction({
+    const ix = multisigClient.instruction.executeTransaction({
       accounts: {
         multisig,
         multisigSigner,
@@ -493,6 +521,20 @@ function TxListItem({
           isWritable: false,
           isSigner: false,
         }),
+    });
+    const t = new Transaction();
+    t.add(ix);
+    const {
+      context: { slot: minContextSlot },
+      value: { blockhash, lastValidBlockHeight },
+    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
+    t.feePayer = wallet.publicKey!;
+    t.recentBlockhash = blockhash;
+    const signature = await wallet.sendTransaction(t, { minContextSlot});
+    await multisigClient.provider.connection.confirmTransaction({
+      blockhash,
+      lastValidBlockHeight,
+      signature,
     });
     enqueueSnackbar("Transaction executed", {
       variant: "success",

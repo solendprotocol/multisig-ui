@@ -1,5 +1,6 @@
 import EventEmitter from "eventemitter3";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, SendOptions, Transaction, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
+import { SendTransactionOptions } from "@solana/wallet-adapter-base";
 
 export interface WalletAdapter {
     publicKey: PublicKey | null | undefined;
@@ -7,6 +8,10 @@ export interface WalletAdapter {
     connected: boolean;
     signTransaction: (transaction: Transaction) => Promise<Transaction>;
     signAllTransactions: (transaction: Transaction[]) => Promise<Transaction[]>;
+    sendTransaction: (
+        transaction: Transaction,
+        options?: SendTransactionOptions
+    ) => Promise<TransactionSignature>;
     connect: () => any;
     disconnect: () => any;
     // eslint-disable-next-line
@@ -26,6 +31,10 @@ interface PhantomProvider {
     autoApprove?: boolean;
     signTransaction: (transaction: Transaction) => Promise<Transaction>;
     signAllTransactions: (transactions: Transaction[]) => Promise<Transaction[]>;
+    signAndSendTransaction<T extends Transaction | VersionedTransaction>(
+        transaction: T,
+        options?: SendOptions
+    ): Promise<{ signature: TransactionSignature }>;
     connect: () => Promise<void>;
     disconnect: () => Promise<void>;
     on: (event: PhantomEvent, handler: (args: any) => void) => void;
@@ -86,6 +95,20 @@ export class PhantomWalletAdapter
         }
 
         return this._provider.signTransaction(transaction);
+    }
+
+    async sendTransaction(
+        transaction: Transaction,
+        options: SendTransactionOptions = {}
+    ): Promise<TransactionSignature> {
+        if (!this._provider) {
+            throw new Error("Phantom Wallet not installed");
+        }
+
+        console.log('blah sending transaction')
+        const { signature } = await this._provider.signAndSendTransaction(transaction, options);
+        console.log('sent transaction')
+        return signature;
     }
 
     async connect() {
