@@ -1,6 +1,6 @@
 # MULTISIG WEB APP
 
-Amazing multisig web app built with love
+Amazing multisig web app built with love 
 
 ## Available Scripts
 
