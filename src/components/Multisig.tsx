@@ -289,11 +289,6 @@ export function NewMultisigDialog({
       multisigClient.programId
     );
     const owners = participants.map((p) => new PublicKey(p));
-    const createIx = await multisigClient.account.multisig.createInstruction(
-      multisig,
-      // @ts-ignore
-      multisigSize
-    );
     const ix = await multisigClient.instruction.createMultisig(
       owners,
       new BN(threshold),
@@ -304,16 +299,22 @@ export function NewMultisigDialog({
           rent: SYSVAR_RENT_PUBKEY,
         },
         signers: [multisig],
+        instructions: [
+          await multisigClient.account.multisig.createInstruction(
+            multisig,
+            // @ts-ignore
+            multisigSize
+          ),
+        ],
       }
     );
     const {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
     } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
-    const t = new Transaction().add(createIx).add(ix);
+    const t = new Transaction().add(ix);
     t.recentBlockhash = blockhash;
     t.feePayer = wallet.publicKey!;
-    t.sign(multisig);
     const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
     await multisigClient.provider.connection.confirmTransaction({
       blockhash,
@@ -484,7 +485,7 @@ function TxListItem({
     } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
     t.feePayer = wallet.publicKey!;
     t.recentBlockhash = blockhash;
-    const signature = await wallet.sendTransaction(t, { minContextSlot });
+    const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
     await multisigClient.provider.connection.confirmTransaction({
       blockhash,
       lastValidBlockHeight,
@@ -913,7 +914,7 @@ function ChangeThresholdListItemDetails({
   didAddTransaction: (tx: PublicKey) => void;
 }) {
   const [threshold, setThreshold] = useState(2);
-  const { multisigClient, wallet } = useWallet();
+  const { multisigClient } = useWallet();
   // @ts-ignore
   const { enqueueSnackbar } = useSnackbar();
   const changeThreshold = async () => {
@@ -939,12 +940,7 @@ function ChangeThresholdListItemDetails({
     ];
     const transaction = new Account();
     const txSize = 1000; // todo
-    const createIx = await multisigClient.account.transaction.createInstruction(
-      transaction,
-      // @ts-ignore
-      txSize
-    );
-    const ix = await multisigClient.instruction.createTransaction(
+    const tx = await multisigClient.rpc.createTransaction(
       multisigClient.programId,
       accounts,
       data,
@@ -956,28 +952,18 @@ function ChangeThresholdListItemDetails({
           rent: SYSVAR_RENT_PUBKEY,
         },
         signers: [transaction],
+        instructions: [
+          await multisigClient.account.transaction.createInstruction(
+            transaction,
+            // @ts-ignore
+            txSize
+          ),
+        ],
       }
     );
-
-    const t = new Transaction();
-    t.add(createIx).add(ix);
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
-    t.feePayer = wallet.publicKey!;
-    t.recentBlockhash = blockhash;
-    t.sign(transaction);
-    const signature = await wallet.sendTransaction(t, { minContextSlot});
-    await multisigClient.provider.connection.confirmTransaction({
-      blockhash,
-      lastValidBlockHeight,
-      signature,
-    });
-
     enqueueSnackbar("Transaction created", {
       variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={signature} />,
+      action: <ViewTransactionOnExplorerButton signature={tx} />,
     });
     didAddTransaction(transaction.publicKey);
     onClose();
@@ -1047,7 +1033,7 @@ function SetOwnersListItemDetails({
   onClose: Function;
   didAddTransaction: (tx: PublicKey) => void;
 }) {
-  const { multisigClient, wallet } = useWallet();
+  const { multisigClient } = useWallet();
   // @ts-ignore
   const zeroAddr = new PublicKey("11111111111111111111111111111111").toString();
   const [participants, setParticipants] = useState([zeroAddr]);
@@ -1076,12 +1062,7 @@ function SetOwnersListItemDetails({
     ];
     const transaction = new Account();
     const txSize = 5000; // TODO: tighter bound.
-    const createIx = await multisigClient.account.transaction.createInstruction(
-      transaction,
-      // @ts-ignore
-      txSize
-    );
-    const ix = await multisigClient.instruction.createTransaction(
+    const tx = await multisigClient.rpc.createTransaction(
       multisigClient.programId,
       accounts,
       data,
@@ -1093,28 +1074,18 @@ function SetOwnersListItemDetails({
           rent: SYSVAR_RENT_PUBKEY,
         },
         signers: [transaction],
+        instructions: [
+          await multisigClient.account.transaction.createInstruction(
+            transaction,
+            // @ts-ignore
+            txSize
+          ),
+        ],
       }
     );
-
-    const t = new Transaction();
-    t.add(createIx).add(ix);
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
-    t.feePayer = wallet.publicKey!;
-    t.recentBlockhash = blockhash;
-    t.sign(transaction);
-    const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
-    await multisigClient.provider.connection.confirmTransaction({
-      blockhash,
-      lastValidBlockHeight,
-      signature,
-    });
-
     enqueueSnackbar("Transaction created", {
       variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={signature} />,
+      action: <ViewTransactionOnExplorerButton signature={tx} />,
     });
     didAddTransaction(transaction.publicKey);
     onClose();
@@ -1208,10 +1179,9 @@ function UpgradeIdlListItemDetails({
   const [programId, setProgramId] = useState<null | string>(null);
   const [buffer, setBuffer] = useState<null | string>(null);
 
-  const { multisigClient, wallet } = useWallet();
+  const { multisigClient } = useWallet();
   const { enqueueSnackbar } = useSnackbar();
   const createTransactionAccount = async () => {
-    debugger;
     enqueueSnackbar("Creating transaction", {
       variant: "info",
     });
@@ -1234,12 +1204,7 @@ function UpgradeIdlListItemDetails({
     ];
     const txSize = 1000; // TODO: tighter bound.
     const transaction = new Account();
-    const createIx = await multisigClient.account.transaction.createInstruction(
-      transaction,
-      // @ts-ignore
-      txSize
-    );
-    const ix = await multisigClient.instruction.createTransaction(
+    const tx = await multisigClient.rpc.createTransaction(
       programAddr,
       accs,
       data,
@@ -1251,27 +1216,18 @@ function UpgradeIdlListItemDetails({
           rent: SYSVAR_RENT_PUBKEY,
         },
         signers: [transaction],
+        instructions: [
+          await multisigClient.account.transaction.createInstruction(
+            transaction,
+            // @ts-ignore
+            txSize
+          ),
+        ],
       }
     );
-    const t = new Transaction();
-    t.add(createIx).add(ix);
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
-    t.feePayer = wallet.publicKey!;
-    t.recentBlockhash = blockhash;
-    t.sign(transaction);
-    const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
-    await multisigClient.provider.connection.confirmTransaction({
-      blockhash,
-      lastValidBlockHeight,
-      signature,
-    });
-
     enqueueSnackbar("Transaction created", {
       variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={signature} />,
+      action: <ViewTransactionOnExplorerButton signature={tx} />,
     });
     didAddTransaction(transaction.publicKey);
     onClose();
@@ -1361,7 +1317,7 @@ function UpgradeProgramListItemDetails({
   const [programId, setProgramId] = useState<null | string>(null);
   const [buffer, setBuffer] = useState<null | string>(null);
 
-  const { multisigClient, wallet } = useWallet();
+  const { multisigClient } = useWallet();
   const { enqueueSnackbar } = useSnackbar();
   const createTransactionAccount = async () => {
     enqueueSnackbar("Creating transaction", {
@@ -1404,12 +1360,7 @@ function UpgradeProgramListItemDetails({
     ];
     const txSize = 1000; // TODO: tighter bound.
     const transaction = new Account();
-    const createIx = await multisigClient.account.transaction.createInstruction(
-      transaction,
-      // @ts-ignore
-      txSize
-    );
-    const ix = await multisigClient.instruction.createTransaction(
+    const tx = await multisigClient.rpc.createTransaction(
       BPF_LOADER_UPGRADEABLE_PID,
       accs,
       data,
@@ -1421,27 +1372,18 @@ function UpgradeProgramListItemDetails({
           rent: SYSVAR_RENT_PUBKEY,
         },
         signers: [transaction],
+        instructions: [
+          await multisigClient.account.transaction.createInstruction(
+            transaction,
+            // @ts-ignore
+            txSize
+          ),
+        ],
       }
     );
-    const t = new Transaction();
-    t.add(ix);
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
-    t.feePayer = wallet.publicKey!;
-    t.recentBlockhash = blockhash;
-    t.sign(transaction);
-    const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
-    await multisigClient.provider.connection.confirmTransaction({
-      blockhash,
-      lastValidBlockHeight,
-      signature,
-    });
-
     enqueueSnackbar("Transaction created", {
       variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={signature} />,
+      action: <ViewTransactionOnExplorerButton signature={tx} />,
     });
     didAddTransaction(transaction.publicKey);
     onClose();
@@ -1529,7 +1471,7 @@ function TransferTokenListItemDetails({
   const [amount, setAmount] = useState<null | u64>(null);
   const [tokenMap, setTokenMap] = useState<Map<string, TokenInfo>>(new Map());
 
-  const { multisigClient, wallet } = useWallet();
+  const { multisigClient } = useWallet();
   const { enqueueSnackbar } = useSnackbar();
 
   const tokenAccounts = useMultiSigOwnedTokenAccounts(multisigClient.provider, multisig, multisigClient.programId)
@@ -1568,6 +1510,7 @@ function TransferTokenListItemDetails({
     );
 
     if (destinationAccountInfo === null || destinationAccountInfo.owner.toString() !== TOKEN_PROGRAM_ID.toString() || destinationAccountInfo.data.length !== ACCOUNT_LAYOUT.span) {
+      debugger
       enqueueSnackbar("Not token account", {
         variant: "error",
       });
@@ -1602,14 +1545,7 @@ function TransferTokenListItemDetails({
       new u64(amount.toString())
     );
     const transaction = new Account();
-
-    const createIx = await multisigClient.account.transaction.createInstruction(
-      transaction,
-      // @ts-ignore
-      1000
-    );
-
-    const ix = await multisigClient.instruction.createTransaction(
+    const tx = await multisigClient.rpc.createTransaction(
       TOKEN_PROGRAM_ID,
       transferIx.keys,
       Buffer.from(transferIx.data),
@@ -1621,28 +1557,18 @@ function TransferTokenListItemDetails({
           rent: SYSVAR_RENT_PUBKEY,
         },
         signers: [transaction],
+        instructions: [
+          await multisigClient.account.transaction.createInstruction(
+            transaction,
+            // @ts-ignore
+            1000
+          ),
+        ],
       }
     );
-    const t = new Transaction();
-    t.add(createIx);
-    t.add(ix);
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
-    t.feePayer = wallet.publicKey!;
-    t.recentBlockhash = blockhash;
-    t.sign(transaction);
-    const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true});
-    await multisigClient.provider.connection.confirmTransaction({
-      blockhash,
-      lastValidBlockHeight,
-      signature,
-    });
-
     enqueueSnackbar("Transaction created", {
       variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={signature} />,
+      action: <ViewTransactionOnExplorerButton signature={tx} />,
     });
     didAddTransaction(transaction.publicKey);
     onClose();
