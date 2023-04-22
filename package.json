@@ -9,9 +9,12 @@
     "@project-serum/borsh": "^0.1.1",
     "@project-serum/common": "^0.0.1-beta.3",
     "@project-serum/sol-wallet-adapter": "^0.2.0",
-    "@solana/wallet-adapter-base": "^0.9.18",
     "@solana/spl-token": "^0.1.8",
     "@solana/spl-token-registry": "^0.2.2649",
+    "@solana/wallet-adapter-base": "^0.9.18",
+    "@solana/wallet-adapter-react": "^0.15.32",
+    "@solana/wallet-adapter-react-ui": "^0.9.31",
+    "@solana/wallet-adapter-wallets": "^0.19.16",
     "@solana/web3.js": "^1.66.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -48,9 +51,9 @@
     ]
   },
   "browserslist": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
   ],
   "devDependencies": {
     "gh-pages": "^3.1.0",

@@ -55,7 +55,7 @@ export const networks: Networks = {
   mainnet: {
     // Cluster.
     label: "Mainnet Beta",
-    url: "https://solendf-solendf-67c7.rpcpool.com/",
+    url: "https://solendf-solendf-67c7.rpcpool.com/fa3b9e36-8b89-43b8-9cfc-735fec8451f2",
     explorerClusterSuffix: "",
     multisigProgramId: new PublicKey(
       "BLg8mSPvEjzSkbGdE9mRJfTSm7EauYgzFsWhERKn1gRm"

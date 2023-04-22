@@ -5,7 +5,7 @@ import { Provider } from '@project-serum/anchor';
 import { PublicKey } from '@solana/web3.js';
 import { TokenAccountContext } from '../models/TokenAccountContext';
 import { useProgramSubscription } from '../hooks/useProgramSubscription';
-import { useWallet } from "../components/WalletProvider";
+import { useWallet2 } from "../components/WalletProvider";
 import { KeyedAccountInfo } from '@solana/web3.js';
 import { parseTokenAccount } from '@project-serum/common';
 
@@ -41,7 +41,7 @@ interface Interface {
 const Context = React.createContext<Interface>(undefined!);
 
 export function AccountProvider({ children = null as any }) {
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
 
   const [splAccounts, reloadSplAccounts, isReloadingSplAccounts] =
     useProgramSubscription<AccountInfo>(

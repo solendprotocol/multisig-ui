@@ -57,7 +57,7 @@ import {
   SYSVAR_CLOCK_PUBKEY,
   Transaction,
 } from "@solana/web3.js";
-import { useWallet } from "./WalletProvider";
+import { useWallet2 } from "./WalletProvider";
 import { ViewTransactionOnExplorerButton } from "./Notification";
 import * as idl from "../utils/idl";
 import { networks } from "../store/reducer";
@@ -105,7 +105,7 @@ function NewMultisigButton() {
 }
 
 export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
   const [multisigAccount, setMultisigAccount] = useState<any>(undefined);
   const [transactions, setTransactions] = useState<any>(null);
   const [showSignerDialog, setShowSignerDialog] = useState(false);
@@ -258,7 +258,7 @@ export function NewMultisigDialog({
   onClose: () => void;
 }) {
   const history = useHistory();
-  const { multisigClient, wallet } = useWallet();
+  const { multisigClient, wallet } = useWallet2();
   const { enqueueSnackbar } = useSnackbar();
   const [threshold, setThreshold] = useState(2);
   // @ts-ignore
@@ -409,7 +409,7 @@ function TxListItem({
   tx: any;
 }) {
   const { enqueueSnackbar } = useSnackbar();
-  const { multisigClient, wallet } = useWallet();
+  const { multisigClient, wallet } = useWallet2();
   const [open, setOpen] = useState(false);
   const [txAccount, setTxAccount] = useState(tx.account);
   useEffect(() => {
@@ -483,6 +483,7 @@ function TxListItem({
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
     } = await multisigClient.provider.connection.getLatestBlockhashAndContext();
+    debugger;
     t.feePayer = wallet.publicKey!;
     t.recentBlockhash = blockhash;
     const signature = await wallet.sendTransaction(t, { minContextSlot, skipPreflight: true });
@@ -558,15 +559,7 @@ function TxListItem({
               variant="contained"
               color="primary"
               onClick={() =>
-                approve().catch((err) => {
-                  let errStr = "";
-                  if (err) {
-                    errStr = err.toString();
-                  }
-                  enqueueSnackbar(`Unable to approve transaction: ${errStr}`, {
-                    variant: "error",
-                  });
-                })
+                approve()
               }
             >
               Approve
@@ -770,7 +763,7 @@ function SignerDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
   const [signer, setSigner] = useState<null | string>(null);
   useEffect(() => {
     PublicKey.findProgramAddress(
@@ -914,7 +907,7 @@ function ChangeThresholdListItemDetails({
   didAddTransaction: (tx: PublicKey) => void;
 }) {
   const [threshold, setThreshold] = useState(2);
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
   // @ts-ignore
   const { enqueueSnackbar } = useSnackbar();
   const changeThreshold = async () => {
@@ -1033,7 +1026,7 @@ function SetOwnersListItemDetails({
   onClose: Function;
   didAddTransaction: (tx: PublicKey) => void;
 }) {
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
   // @ts-ignore
   const zeroAddr = new PublicKey("11111111111111111111111111111111").toString();
   const [participants, setParticipants] = useState([zeroAddr]);
@@ -1179,7 +1172,7 @@ function UpgradeIdlListItemDetails({
   const [programId, setProgramId] = useState<null | string>(null);
   const [buffer, setBuffer] = useState<null | string>(null);
 
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
   const { enqueueSnackbar } = useSnackbar();
   const createTransactionAccount = async () => {
     enqueueSnackbar("Creating transaction", {
@@ -1317,7 +1310,7 @@ function UpgradeProgramListItemDetails({
   const [programId, setProgramId] = useState<null | string>(null);
   const [buffer, setBuffer] = useState<null | string>(null);
 
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
   const { enqueueSnackbar } = useSnackbar();
   const createTransactionAccount = async () => {
     enqueueSnackbar("Creating transaction", {
@@ -1471,7 +1464,7 @@ function TransferTokenListItemDetails({
   const [amount, setAmount] = useState<null | u64>(null);
   const [tokenMap, setTokenMap] = useState<Map<string, TokenInfo>>(new Map());
 
-  const { multisigClient } = useWallet();
+  const { multisigClient } = useWallet2();
   const { enqueueSnackbar } = useSnackbar();
 
   const tokenAccounts = useMultiSigOwnedTokenAccounts(multisigClient.provider, multisig, multisigClient.programId)
