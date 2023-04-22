@@ -1424,7 +1424,7 @@ function UpgradeProgramListItemDetails({
       }
     );
     const t = new Transaction();
-    t.add(ix);
+    t.add(createIx).add(ix);
     const {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
