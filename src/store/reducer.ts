@@ -54,9 +54,8 @@ export type CommonState = {
 export const networks: Networks = {
   mainnet: {
     // Cluster.
-    label: "Mainnet Beta",
-    url:
-      "https://solana-mainnet.g.alchemy.com/v2/ZT3c4pYf1inIrB0GVDNR7nx4LwyED5Ci",
+    label: "Mainnet Beta 2",
+    url: "https://solendf-solendf-67c7.rpcpool.com",
     explorerClusterSuffix: "",
     multisigProgramId: new PublicKey(
       "BLg8mSPvEjzSkbGdE9mRJfTSm7EauYgzFsWhERKn1gRm"
@@ -67,8 +66,9 @@ export const networks: Networks = {
   },
   mainnet2: {
     // Cluster.
-    label: "Mainnet Beta 2",
-    url: "https://rpc.helius.xyz/?api-key=96d88c32-e147-4ef8-88b0-18c758ca69df",
+    label: "Mainnet Beta",
+    url:
+      "https://solana-mainnet.g.alchemy.com/v2/ZT3c4pYf1inIrB0GVDNR7nx4LwyED5Ci",
     explorerClusterSuffix: "",
     multisigProgramId: new PublicKey(
       "BLg8mSPvEjzSkbGdE9mRJfTSm7EauYgzFsWhERKn1gRm"
